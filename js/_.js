@@ -30,7 +30,7 @@ function _curryr(fn) {
 function _each(list, iter) {
   var keys = _keys(list)
   for(var i = 0, len = keys.length; i < len; i++){
-    iter(list[keys[i]])
+    iter(list[keys[i]], keys[i])
   }
   return list;
 }
@@ -149,6 +149,8 @@ function _reject(data, predi) {
   return _filter(data, _negate(predi))
 }
 
+var _reject = _curryr(_reject)
+
 var _compact = _filter(_identity)
 
 function _find(list, predi) {
@@ -180,6 +182,70 @@ function _every(data, predi) {
   return _find_index(data, _negate(predi || _identity)) === -1;
 }
 
+// 4. 접기 - reduce
+function _min(data) {
+  return _reduce(data, function(a, b) {
+    return a < b ? a : b;
+  })
+}
+
+function _max(data) {
+  return _reduce(data, function(a, b) {
+    return a > b ? a : b;
+  })
+}
+
+function _min_by(data, iter) {
+  return _reduce(data, function(a, b) {
+    return iter(a) < iter(b) ? a : b;
+  })
+}
+
+var _min_by = _curryr(_min_by);
+
+function _max_by(data, iter) {
+  return _reduce(data, function(a, b) {
+    return iter(a) > iter(b) ? a : b;
+  })
+}
+
+var _max_by = _curryr(_max_by);
+
+function _push(obj, key, val) {
+  (obj[key] = obj[key] || []).push(val)
+  return obj;
+}
+
+function _head(list) {
+  return list[0]
+}
+
+function _group_by(data, iter) {
+  return _reduce(data, function(grouped, val) {
+    return _push(grouped, iter(val), val)
+  }, {})
+}
+
+var _group_by = _curryr(_group_by);
+
+function _inc(count, key) {
+  count[key] ? count[key]++ : count[key] = 1;
+  return count;
+}
+
+
+function _count_by(data, iter) {
+  return _reduce(data, function(count, val) {
+    return _inc(count, iter(val))
+  }, {})
+}
+
+var _count_by = _curryr(_count_by)
+
+
+var _pairs = _map((val, key) => [key, val]);
+
+
 module.exports = {
   _curry,
   _curryr,
@@ -200,4 +266,12 @@ module.exports = {
   _find_index,
   _some,
   _every,
+  _min,
+  _max,
+  _min_by,
+  _max_by,
+  _group_by,
+  _count_by,
+  _pairs,
+  _head,
 }
